@@ -102,13 +102,13 @@ window.Maze = {
 
   walls: [],
   wallThickness: 50,
-  currentX: 100,
+  currentX: 80,
   currentY: 0,
 
   create: function() {
-    while(this.currentX <= window.innerWidth - 100) {
+    while(this.currentX <= window.innerWidth - 80) {
       this.walls.push(new Wall(this.currentX, this.currentY, this.wallThickness, window.innerHeight - 100));
-      this.currentX += 200;
+      this.currentX += 100;
       if(this.currentY === 0) { this.currentY = 100; }
       else { this.currentY = 0; }
     }
