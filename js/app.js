@@ -72,8 +72,8 @@ window.Wall = function(x, y, width, height) {
 
 window.Player = {
 
-  x: 50,
-  y: 50,
+  x: 0,
+  y: 0,
   width: 30,
   height: 30,
 
@@ -87,15 +87,19 @@ window.Player = {
   },
 
   reset: function() {
-    this.x = 50;
-    this.y = 50;
+    this.x = 0;
+    this.y = 0;
   }
 
 }
 
 window.ondevicemotion = function(event) {
-  Player.x += (Labyrinth.sensitivity * event.accelerationIncludingGravity.x);
-  Player.y -= (Labyrinth.sensitivity * event.accelerationIncludingGravity.y);
+  Player.x += (Labyrinth.sensitivity * event.accelerationIncludingGravity.x * gyroscopeDirection);
+  Player.y -= (Labyrinth.sensitivity * event.accelerationIncludingGravity.y * gyroscopeDirection);
+}
+
+document.getElementById("reverse-gyroscope").onclick = function () {
+  gyroscopeDirection *= -1;
 }
 
 window.Maze = {
@@ -122,6 +126,8 @@ window.Maze = {
 
 }
 
+var gyroscopeDirection = 1;
+var score = 0;
 var canvas = Canvas.canvas;
 var context = Labyrinth.getContext(canvas);
 Labyrinth.setUp(canvas);
@@ -134,11 +140,16 @@ function run() {
   Player.draw();
   if(Coin.hasBeenHit(Player.x, Player.y)) {
     Coin.regenerateCoordinates();
+    score++;
+    document.getElementById("score").innerHTML = "<strong>Score:</strong> " + score;
   }
   for(var i=0; i < Maze.walls.length; i++) {
     currentWall = Maze.walls[i];
     if(currentWall.hasBeenHit(Player.x, Player.y)) {
       Player.reset();
+      console.log("Game Over! - You scored " + score + " points!");
+      score = 0;
+      document.getElementById("score").innerHTML = "<strong>Score:</strong> " + score;
       break;
     }
   }

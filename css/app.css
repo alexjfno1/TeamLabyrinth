@@ -8,3 +8,16 @@ html, body {
 #labyrinth {
   margin: 0 auto;
 }
+
+#reverse-gyroscope {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#score {
+  position: absolute;
+  top: 0;
+  left: 140px;
+  font-size: 18px;
+}
