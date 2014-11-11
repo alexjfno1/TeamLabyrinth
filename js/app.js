@@ -1,6 +1,6 @@
 window.Labyrinth = {
 
-  sensitivity: 20,
+  sensitivity: 5,
 
   getContext: function(canvas) {
     return canvas.getContext("2d");
@@ -55,7 +55,7 @@ window.Wall = function(x, y, width, height) {
 
   this.x = x;
   this.y = y;
-  this.width = width;
+  this.width = (window.innerWidth / 100) * 5;
   this.height = height;
 
   this.draw = function() {
