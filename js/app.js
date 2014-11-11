@@ -55,16 +55,24 @@ window.Wall = function(x, y, width, height) {
 
   this.x = x;
   this.y = y;
-  this.width = (window.innerWidth / 100) * 5;
   this.height = height;
+  this.maxWidth = 30;
+  this.width = function() {
+    if ((window.innerWidth / 100) * 5 >= this.maxWidth) {
+      return this.maxWidth;
+    } else {
+      return (window.innerWidth / 100) * 5;
+    }
+  },
 
   this.draw = function() {
     context.fillStyle = "#F16D4A";
-    context.fillRect(this.x, this.y, this.width, this.height);
+    this.width();
+    context.fillRect(this.x, this.y, this.width(), this.height);
   },
 
   this.hasBeenHit = function(x, y) {
-    return ((x >= this.x && x <= this.x + this.width) || (x + Player.width >= this.x && x + Player.width <= this.x + this.width))
+    return ((x >= this.x && x <= this.x + this.width()) || (x + Player.width >= this.x && x + Player.width <= this.x + this.width()))
       && ((y >= this.y && y <= this.y + this.height) || (y + Player.height >= this.y && y + Player.height <= this.y + this.height));
   }
 
@@ -106,13 +114,13 @@ window.Maze = {
 
   walls: [],
   wallThickness: 50,
-  currentX: 80,
+  currentX: (window.innerWidth / 100) * 15,
   currentY: 0,
 
   create: function() {
     while(this.currentX <= window.innerWidth - 80) {
       this.walls.push(new Wall(this.currentX, this.currentY, this.wallThickness, window.innerHeight - 100));
-      this.currentX += 100;
+      this.currentX += ((window.innerWidth / 100) * 15) + this.wallThickness;
       if(this.currentY === 0) { this.currentY = 100; }
       else { this.currentY = 0; }
     }
