@@ -10,6 +10,6 @@ app.get("/", function(req, res) {
   res.sendfile(__dirname + "/views/index.html");
 });
 
-app.listen(process.env.port || 1234, function() {
+app.listen(process.env.PORT || 1234, function() {
   console.log("***** APP STARTED *****");
 });
