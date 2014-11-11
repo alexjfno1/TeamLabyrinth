@@ -1,6 +1,6 @@
 window.Labyrinth = {
 
-  sensitivity: 5,
+  sensitivity: 20,
 
   getContext: function(canvas) {
     return canvas.getContext("2d");
@@ -20,7 +20,7 @@ window.Canvas = {
   width: window.innerWidth,
   height: window.innerHeight,
 
-  clear: function(context) {
+  clear: function() {
     context.fillStyle = "#046380";
     context.fillRect(0, 0, window.innerWidth, window.innerHeight);
   }
@@ -32,7 +32,7 @@ window.Coin = {
   x: window.innerWidth / 2,
   y: window.innerHeight / 2,
 
-  draw: function(context) {
+  draw: function() {
     context.fillStyle = "#2F2F2F";
     context.fillRect(this.x, this.y, 30, 30);
   },
@@ -47,42 +47,99 @@ window.Coin = {
   }
 }
 
-window.Ball = {
+window.Wall = function(x, y, width, height) {
+
+  this.x = x;
+  this.y = y;
+  this.width = width;
+  this.height = height;
+
+  this.draw = function() {
+    context.fillStyle = "#F16D4A";
+    context.fillRect(this.x, this.y, this.width, this.height);
+  },
+
+  this.hasBeenHit = function(x, y) {
+    return ((x >= this.x && x <= this.x + this.width) || (x + Player.width >= this.x && x + Player.width <= this.x + this.width))
+      && ((y >= this.y && y <= this.y + this.height) || (y + Player.height >= this.y && y + Player.height <= this.y + this.height));
+  }
+
+}
+
+window.Player = {
 
   x: 50,
   y: 50,
+  width: 30,
+  height: 30,
 
-  draw: function(context) {
-    if (this.x + 30 >= window.innerWidth) { this.x = window.innerWidth - 10; }
-    if (this.x <= 10) { this.x = 10; }
-    if (this.y + 30 >= window.innerHeight) { this.y = window.innerHeight - 10; }
-    if (this.y <= 10) { this.y = 10; }
-    context.beginPath();
-    context.arc(this.x, this.y, 10, 0, Math.PI * 2);
-    context.closePath();
+  draw: function() {
+    if (this.x + this.width >= window.innerWidth) { this.x = window.innerWidth - this.width; }
+    if (this.x <= 0) { this.x = 0; }
+    if (this.y + this.height >= window.innerHeight) { this.y = window.innerHeight - this.height; }
+    if (this.y <= 0) { this.y = 0; }
     context.fillStyle = "#EFECCA";
-    context.fill();
+    context.fillRect(this.x, this.y, this.width, this.height);
+  },
+
+  reset: function() {
+    this.x = 50;
+    this.y = 50;
   }
 
 }
 
 window.ondevicemotion = function(event) {
-  Ball.x += (Labyrinth.sensitivity * event.accelerationIncludingGravity.x);
-  Ball.y -= (Labyrinth.sensitivity * event.accelerationIncludingGravity.y);
+  Player.x += (Labyrinth.sensitivity * event.accelerationIncludingGravity.x);
+  Player.y -= (Labyrinth.sensitivity * event.accelerationIncludingGravity.y);
+}
+
+window.Maze = {
+
+  walls: [],
+  wallThickness: 50,
+  currentX: 100,
+  currentY: 0,
+
+  create: function() {
+    while(this.currentX <= window.innerWidth - 100) {
+      this.walls.push(new Wall(this.currentX, this.currentY, this.wallThickness, window.innerHeight - 100));
+      this.currentX += 200;
+      if(this.currentY === 0) { this.currentY = 100; }
+      else { this.currentY = 0; }
+    }
+  },
+
+  draw: function() {
+    for(var i=0; i < this.walls.length; i++) {
+      this.walls[i].draw();
+    }
+  }
+
 }
 
 var canvas = Canvas.canvas;
 var context = Labyrinth.getContext(canvas);
 Labyrinth.setUp(canvas);
+var walls = [];
 
 function run() {
-  Canvas.clear(context);
-  Coin.draw(context);
-  Ball.draw(context);
-  if(Coin.hasBeenHit(Ball.x, Ball.y)) {
+  Canvas.clear();
+  Coin.draw();
+  Maze.draw();
+  Player.draw();
+  if(Coin.hasBeenHit(Player.x, Player.y)) {
     Coin.regenerateCoordinates();
+  }
+  for(var i=0; i < Maze.walls.length; i++) {
+    currentWall = Maze.walls[i];
+    if(currentWall.hasBeenHit(Player.x, Player.y)) {
+      Player.reset();
+      break;
+    }
   }
   window.requestAnimationFrame(run);
 };
 
+Maze.create();
 run();
