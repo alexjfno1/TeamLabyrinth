@@ -31,20 +31,24 @@ window.Coin = {
 
   x: window.innerWidth / 2,
   y: window.innerHeight / 2,
+  width: 30,
+  height: 30,
 
   draw: function() {
     context.fillStyle = "#2F2F2F";
-    context.fillRect(this.x, this.y, 30, 30);
+    context.fillRect(this.x, this.y, this.width, this.height);
   },
 
   hasBeenHit: function(x, y) {
-    return (x >= this.x && x <= this.x + 30) && (y >= this.y && y <= this.y + 30)
+    return ((x >= this.x && x <= this.x + this.width) || (x + Player.width >= this.x && x + Player.width <= this.x + this.width))
+      && ((y >= this.y && y <= this.y + this.height) || (y + Player.height >= this.y && y + Player.height <= this.y + this.height));
   },
 
   regenerateCoordinates: function() {
     this.x = Math.floor((Math.random() * (window.innerWidth - 30)) + 1);
     this.y = Math.floor((Math.random() * (window.innerHeight -30)) + 1);
   }
+
 }
 
 window.Wall = function(x, y, width, height) {
