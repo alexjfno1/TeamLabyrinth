@@ -1,14 +1,48 @@
 window.Labyrinth = {
 
   sensitivity: 5,
+  gyroscopeDirection: 1,
+  score: 0,
 
-  getContext: function(canvas) {
-    return canvas.getContext("2d");
+  canvas: function() {
+    return Canvas.canvas;
   },
 
-  setUp: function(canvas) {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+  context: function() {
+    return this.getContext(this.canvas());
+  },
+
+  getContext: function() {
+    return this.canvas().getContext("2d");
+  },
+
+  setUp: function() {
+    this.canvas().width = window.innerWidth;
+    this.canvas().height = window.innerHeight;
+    Maze.create();
+  },
+
+  run: function() {
+    Canvas.clear();
+    Coin.draw();
+    Maze.draw();
+    Player.draw();
+    if(Coin.hasBeenHit(Player.x, Player.y)) {
+      Coin.regenerateCoordinates();
+      Labyrinth.score++;
+      document.getElementById("score").innerHTML = "<strong>Score:</strong> " + Labyrinth.score;
+    }
+    for(var i=0; i < Maze.walls.length; i++) {
+      currentWall = Maze.walls[i];
+      if(currentWall.hasBeenHit(Player.x, Player.y)) {
+        Player.reset();
+        console.log("Game Over! - You scored " + Labyrinth.score + " points!");
+        Labyrinth.score = 0;
+        document.getElementById("score").innerHTML = "<strong>Score:</strong> " + Labyrinth.score;
+        break;
+      }
+    }
+    window.requestAnimationFrame(Labyrinth.run.bind(Labyrinth));
   }
 
 }
@@ -21,8 +55,8 @@ window.Canvas = {
   height: window.innerHeight,
 
   clear: function() {
-    context.fillStyle = "#046380";
-    context.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    Labyrinth.context().fillStyle = "#046380";
+    Labyrinth.context().fillRect(0, 0, window.innerWidth, window.innerHeight);
   }
 
 }
@@ -35,8 +69,8 @@ window.Coin = {
   height: 30,
 
   draw: function() {
-    context.fillStyle = "#2F2F2F";
-    context.fillRect(this.x, this.y, this.width, this.height);
+    Labyrinth.context().fillStyle = "#2F2F2F";
+    Labyrinth.context().fillRect(this.x, this.y, this.width, this.height);
   },
 
   hasBeenHit: function(x, y) {
@@ -47,8 +81,8 @@ window.Coin = {
   regenerateCoordinates: function() {
     var newX = Math.floor((Math.random() * (window.innerWidth - 30)) + 1);
     var newY = Math.floor((Math.random() * (window.innerHeight - 30)) + 1);
-    for(var i=0; i < walls.length; i++) {
-      currentWall = walls[i];
+    for(var i=0; i < Maze.walls.length; i++) {
+      currentWall = Maze.walls[i];
       if(currentWall.hasBeenHit(newX, newY)) {
         this.regenerateCoordinates();
       }
@@ -74,9 +108,9 @@ window.Wall = function(x, y, width, height) {
   },
 
   this.draw = function() {
-    context.fillStyle = "#F16D4A";
+    Labyrinth.context().fillStyle = "#F16D4A";
     this.width();
-    context.fillRect(this.x, this.y, this.width(), this.height);
+    Labyrinth.context().fillRect(this.x, this.y, this.width(), this.height);
   },
 
   this.hasBeenHit = function(x, y) {
@@ -98,8 +132,8 @@ window.Player = {
     if (this.x <= 0) { this.x = 0; }
     if (this.y + this.height >= window.innerHeight) { this.y = window.innerHeight - this.height; }
     if (this.y <= 0) { this.y = 0; }
-    context.fillStyle = "#EFECCA";
-    context.fillRect(this.x, this.y, this.width, this.height);
+    Labyrinth.context().fillStyle = "#EFECCA";
+    Labyrinth.context().fillRect(this.x, this.y, this.width, this.height);
   },
 
   reset: function() {
@@ -110,12 +144,12 @@ window.Player = {
 }
 
 window.ondevicemotion = function(event) {
-  Player.x += (Labyrinth.sensitivity * event.accelerationIncludingGravity.x * gyroscopeDirection);
-  Player.y -= (Labyrinth.sensitivity * event.accelerationIncludingGravity.y * gyroscopeDirection);
+  Player.x += (Labyrinth.sensitivity * event.accelerationIncludingGravity.x * Labyrinth.gyroscopeDirection);
+  Player.y -= (Labyrinth.sensitivity * event.accelerationIncludingGravity.y * Labyrinth.gyroscopeDirection);
 }
 
 document.getElementById("reverse-gyroscope").onclick = function () {
-  gyroscopeDirection *= -1;
+  Labyrinth.gyroscopeDirection *= -1;
 }
 
 window.Maze = {
@@ -142,35 +176,5 @@ window.Maze = {
 
 }
 
-var gyroscopeDirection = 1;
-var score = 0;
-var canvas = Canvas.canvas;
-var context = Labyrinth.getContext(canvas);
-Labyrinth.setUp(canvas);
-var walls = [];
-
-function run() {
-  Canvas.clear();
-  Coin.draw();
-  Maze.draw();
-  Player.draw();
-  if(Coin.hasBeenHit(Player.x, Player.y)) {
-    Coin.regenerateCoordinates();
-    score++;
-    document.getElementById("score").innerHTML = "<strong>Score:</strong> " + score;
-  }
-  for(var i=0; i < Maze.walls.length; i++) {
-    currentWall = Maze.walls[i];
-    if(currentWall.hasBeenHit(Player.x, Player.y)) {
-      Player.reset();
-      console.log("Game Over! - You scored " + score + " points!");
-      score = 0;
-      document.getElementById("score").innerHTML = "<strong>Score:</strong> " + score;
-      break;
-    }
-  }
-  window.requestAnimationFrame(run);
-};
-
-Maze.create();
-run();
+Labyrinth.setUp();
+Labyrinth.run();
