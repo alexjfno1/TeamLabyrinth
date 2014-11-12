@@ -45,8 +45,16 @@ window.Coin = {
   },
 
   regenerateCoordinates: function() {
-    this.x = Math.floor((Math.random() * (window.innerWidth - 30)) + 1);
-    this.y = Math.floor((Math.random() * (window.innerHeight -30)) + 1);
+    var newX = Math.floor((Math.random() * (window.innerWidth - 30)) + 1);
+    var newY = Math.floor((Math.random() * (window.innerHeight - 30)) + 1);
+    for(var i=0; i < walls.length; i++) {
+      currentWall = walls[i];
+      if(currentWall.hasBeenHit(newX, newY)) {
+        this.regenerateCoordinates();
+      }
+    }
+    this.x = newX;
+    this.Y = newY;
   }
 
 }
