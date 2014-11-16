@@ -25,7 +25,7 @@ window.Labyrinth = {
   },
 
   updateScore: function() {
-    document.getElementById("score").innerHTML = "<strong>" + Player.name + "'s Score:</strong> " + Labyrinth.score;
+    document.getElementById("score").innerHTML = "<strong>" + Player.name + "'s Score</strong> => " + Labyrinth.score;
   },
 
   start: function() {
