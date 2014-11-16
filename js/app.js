@@ -43,13 +43,16 @@ window.Labyrinth = {
       currentWall = Maze.walls[i];
       if(currentWall.hasBeenHit(Player.x, Player.y)) {
         Player.reset();
-        console.log("Game Over! - You scored " + Labyrinth.score + " points!");
-        Labyrinth.score = 0;
-        this.updateScore();
+        document.getElementById("game-over-message").innerHTML = "You scored " + this.score + " points!";
+        document.getElementById("game-over").style.display = "block";
+        this.score = 0;
+        this.stop();
         break;
       }
     }
-    this.animationID = window.requestAnimationFrame(Labyrinth.run.bind(Labyrinth));
+    if(!this.stopped) {
+      this.animationID = window.requestAnimationFrame(Labyrinth.run.bind(Labyrinth));
+    }
   },
 
   stop: function() {
