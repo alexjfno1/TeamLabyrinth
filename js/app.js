@@ -28,6 +28,16 @@ window.Labyrinth = {
     document.getElementById("score").innerHTML = "<strong>" + Player.name + "'s Score:</strong> " + Labyrinth.score;
   },
 
+  start: function() {
+    Player.name = document.getElementById("player-name").value;
+    this.updateScore();
+    document.getElementById("player-details").style.display = "none";
+    document.getElementById("game-over").style.display = "none";
+    Player.reset();
+    this.stopped = false;
+    this.run();
+  },
+
   run: function() {
     this.stopped = false;
     Canvas.clear();
@@ -198,10 +208,11 @@ window.Maze = {
 }
 
 document.getElementById("start").onclick = function() {
-  Player.name = document.getElementById("player-name").value;
-  Labyrinth.updateScore();
-  document.getElementById("player-details").style.display = "none";
-  Labyrinth.run();
+  Labyrinth.start();
+}
+
+document.getElementById("restart").onclick = function() {
+  Labyrinth.start();
 }
 
 Labyrinth.setUp();
