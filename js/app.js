@@ -3,6 +3,7 @@ window.Labyrinth = {
   sensitivity: 5,
   gyroscopeDirection: 1,
   score: 0,
+  stopped: true,
 
   canvas: function() {
     return Canvas.canvas;
@@ -19,10 +20,16 @@ window.Labyrinth = {
   setUp: function() {
     this.canvas().width = window.innerWidth;
     this.canvas().height = window.innerHeight;
+    Canvas.draw();
     Maze.create();
   },
 
+  updateScore: function() {
+    document.getElementById("score").innerHTML = "<strong>" + Player.name + "'s Score:</strong> " + Labyrinth.score;
+  },
+
   run: function() {
+    this.stopped = false;
     Canvas.clear();
     Coin.draw();
     Maze.draw();
@@ -30,7 +37,7 @@ window.Labyrinth = {
     if(Coin.hasBeenHit(Player.x, Player.y)) {
       Coin.regenerateCoordinates();
       Labyrinth.score++;
-      document.getElementById("score").innerHTML = "<strong>Score:</strong> " + Labyrinth.score;
+      this.updateScore();
     }
     for(var i=0; i < Maze.walls.length; i++) {
       currentWall = Maze.walls[i];
@@ -38,11 +45,16 @@ window.Labyrinth = {
         Player.reset();
         console.log("Game Over! - You scored " + Labyrinth.score + " points!");
         Labyrinth.score = 0;
-        document.getElementById("score").innerHTML = "<strong>Score:</strong> " + Labyrinth.score;
+        this.updateScore();
         break;
       }
     }
-    window.requestAnimationFrame(Labyrinth.run.bind(Labyrinth));
+    this.animationID = window.requestAnimationFrame(Labyrinth.run.bind(Labyrinth));
+  },
+
+  stop: function() {
+    window.cancelAnimationFrame(this.animationID);
+    this.stopped = true;
   }
 
 }
@@ -54,9 +66,13 @@ window.Canvas = {
   width: window.innerWidth,
   height: window.innerHeight,
 
-  clear: function() {
+  draw: function() {
     Labyrinth.context().fillStyle = "#046380";
     Labyrinth.context().fillRect(0, 0, window.innerWidth, window.innerHeight);
+  },
+
+  clear: function() {
+    this.draw();
   }
 
 }
@@ -144,8 +160,10 @@ window.Player = {
 }
 
 window.ondevicemotion = function(event) {
-  Player.x += (Labyrinth.sensitivity * event.accelerationIncludingGravity.x * Labyrinth.gyroscopeDirection);
-  Player.y -= (Labyrinth.sensitivity * event.accelerationIncludingGravity.y * Labyrinth.gyroscopeDirection);
+  if(!Labyrinth.stopped) {
+    Player.x += (Labyrinth.sensitivity * event.accelerationIncludingGravity.x * Labyrinth.gyroscopeDirection);
+    Player.y -= (Labyrinth.sensitivity * event.accelerationIncludingGravity.y * Labyrinth.gyroscopeDirection);
+  }
 }
 
 document.getElementById("reverse-gyroscope").onclick = function () {
@@ -176,5 +194,11 @@ window.Maze = {
 
 }
 
+document.getElementById("start").onclick = function() {
+  Player.name = document.getElementById("player-name").value;
+  Labyrinth.updateScore();
+  document.getElementById("player-details").style.display = "none";
+  Labyrinth.run();
+}
+
 Labyrinth.setUp();
-Labyrinth.run();
